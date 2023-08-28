@@ -90,7 +90,7 @@ class TemplatesRepository
     public function load($type, $name, $throwOnMissing)
     {
         $key = $this->getKey($type, $name);
-
+        
         if(!($template = $this->getResourceTemplate($key))) {
             throw new TemplateNotFoundException($this->resources[$key] ?? null, $key);
         }

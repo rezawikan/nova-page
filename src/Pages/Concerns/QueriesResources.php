@@ -4,7 +4,6 @@ namespace Whitecube\NovaPage\Pages\Concerns;
 
 use Route;
 use Whitecube\NovaPage\Pages\Template;
-use Whitecube\NovaPage\Pages\OptionResource;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 
 trait QueriesResources
@@ -16,10 +15,17 @@ trait QueriesResources
      * @param  string $type
      * @return \Illuminate\Support\Collection
      */
-    public function queryIndexResources(ResourceIndexRequest $request, $type) {
+    public function queryIndexResources(ResourceIndexRequest $request, $type)
+    {
         $query = $this->newQueryWithoutScopes();
-        return $query->whereType($type)->get(false)->map(function($template) use ($type) {
+        return $query->whereType($type)->get(false)->map(function ($template) use ($type) {
             return $this->getResourceForType($type, $template);
+        })->filter(function ($value) use ($request) {
+            if ($request->search == null) return $value;
+
+            if (str_contains(strtolower($value->title()), strtolower($request->search))) {
+                return $value;
+            }
         });
     }
 
@@ -32,7 +38,13 @@ trait QueriesResources
      */
     public function queryResourcesCount(ResourceIndexRequest $request, $type)
     {
-        return $this->newQueryWithoutScopes()->whereType($type)->get(false)->count();
+        return $this->newQueryWithoutScopes()->whereType($type)->get(false)->filter(function ($value) use ($request) {
+            if ($request->search == null) return $value;
+
+            if (str_contains(strtolower($value->title()), strtolower($request->search))) {
+                return $value;
+            }
+        })->count();
     }
 
     /**
@@ -42,12 +54,15 @@ trait QueriesResources
      * @param  \Whitecube\NovaPage\Pages\Template $resource
      * @return \Laravel\Nova\Resource
      */
-    protected function getResourceForType($type, Template $resource) {
+    protected function getResourceForType($type, Template $resource)
+    {
         $page_resource_class = config('novapage.default_page_resource');
         $option_resource_class = config('novapage.default_option_resource');
         switch ($type) {
-            case 'route': return new $page_resource_class($resource);
-            case 'option': return new $option_resource_class($resource);
+            case 'route':
+                return new $page_resource_class($resource);
+            case 'option':
+                return new $option_resource_class($resource);
         }
     }
 }

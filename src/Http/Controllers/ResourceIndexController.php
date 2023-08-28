@@ -44,6 +44,7 @@ abstract class ResourceIndexController extends Controller
             'next_page_url' => $paginator->nextPageUrl(),
             'per_page' => $paginator->perPage(),
             'softDeletes' => null,
+            'total' => $paginator->count(),
         ]);
     }
 

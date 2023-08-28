@@ -406,10 +406,10 @@ abstract class Template implements ArrayAccess
     /**
      * Determine if the given attribute exists.
      *
-     * @param  mixed  $offset
+     * @param  mixed $offset
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset): bool
     {
         return ! is_null($this->__get($offset));
     }
@@ -420,7 +420,7 @@ abstract class Template implements ArrayAccess
      * @param  mixed  $offset
      * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->__get($offset);
     }
@@ -432,7 +432,7 @@ abstract class Template implements ArrayAccess
      * @param  mixed  $value
      * @return void
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->__set($offset, $value);
     }
@@ -443,7 +443,7 @@ abstract class Template implements ArrayAccess
      * @param  mixed  $offset
      * @return void
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->attributes[$offset]);
     }
