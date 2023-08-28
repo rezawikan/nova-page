@@ -87,12 +87,12 @@ class Database implements SourceInterface {
     public function store(Template $template)
     {
         $original = $this->getOriginal($template);
-
+        $attributes = $template->getAttributes();
         $original->fill([
             'name' => $template->getName(),
-            'title' => $template->getTitle(),
+            'title' => $attributes['nova_page_title'],
             'type' => $template->getType(),
-            'attributes' => json_encode($template->getAttributes()),
+            'attributes' => json_encode($attributes),
             'created_at' => $template->getDate('created_at'),
             'updated_at' => Carbon::now()
         ]);

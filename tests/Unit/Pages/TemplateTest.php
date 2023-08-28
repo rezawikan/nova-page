@@ -265,14 +265,14 @@ class TemplateTest extends TestCase {
     {
         $instance = $this->getInstance();
         $this->assertCount(1, $instance->getJsonAttributes());
-        $this->assertSame('foo_json', $instance->getJsonAttributes()[0]);
+        $this->assertSame('nova_page_title', $instance->getJsonAttributes()[0]);
     }
 
     /** @test */
     public function can_check_if_has_json_attribute()
     {
         $instance = $this->getInstance();
-        $this->assertTrue($instance->isJsonAttribute('foo_json'));
+        $this->assertTrue($instance->isJsonAttribute('nova_page_title'));
         $this->assertFalse($instance->isJsonAttribute('bar_json'));
     }
 

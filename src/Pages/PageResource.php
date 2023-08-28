@@ -69,7 +69,7 @@ class PageResource extends StaticResource
                 ->rules(['required', 'string', 'max:255']),
 
             DateTime::make(__('Page creation date'), 'nova_page_created_at')
-                // ->format('DD-MM-YYYY HH:mm:ss')
+                ->help('The date only created at the first time and can`t be changed.')
                 ->rules(['required', 'string', 'max:255']),
         ];
     }

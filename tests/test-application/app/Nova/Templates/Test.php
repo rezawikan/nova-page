@@ -9,7 +9,7 @@ use Whitecube\NovaPage\Pages\Template;
 class Test extends Template {
 
     protected $jsonAttributes = [
-        'foo_json'
+        'nova_page_title'
     ];
 
     /**
