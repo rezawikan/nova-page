@@ -13,6 +13,7 @@ use Whitecube\NovaPage\Http\Controllers\Option\IndexController as OptionResource
 use Whitecube\NovaPage\Http\Controllers\Option\CountController as OptionResourceCountController;
 use Whitecube\NovaPage\Http\Controllers\Option\UpdateController as OptionResourceUpdateController;
 use Whitecube\NovaPage\Http\Controllers\Option\FieldDestroyController as OptionFieldDestroyController;
+use Whitecube\NovaPage\Http\Controllers\Option\FieldPreviewController as OptionFieldPreviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,3 +52,4 @@ Route::get('/nova-api/nova-option', OptionResourceIndexController::class . '@han
 Route::get('/nova-api/nova-option/count', OptionResourceCountController::class . '@show');
 Route::put('/nova-api/nova-option/{resourceId}', OptionResourceUpdateController::class . '@handle');
 Route::delete('/nova-api/nova-option/{resourceId}/field/{field}', OptionFieldDestroyController::class . '@handle');
+Route::post('/nova-api/nova-option/field/{field}/preview', OptionFieldPreviewController::class);
