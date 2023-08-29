@@ -90,7 +90,7 @@ class Database implements SourceInterface {
         $attributes = $template->getAttributes();
         $original->fill([
             'name' => $template->getName(),
-            'title' => $attributes['nova_page_title'],
+            'title' => $template->getType() === 'option' ? 'Option ' . ucfirst($template->getName()) : $attributes['nova_page_title'],
             'type' => $template->getType(),
             'attributes' => json_encode($attributes),
             'created_at' => $template->getDate('created_at'),
