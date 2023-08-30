@@ -58,6 +58,11 @@ abstract class ResourceUpdateController extends Controller
      */
     protected function templateHasBeenUpdatedSinceRetrieval(UpdateResourceRequest $request, $template)
     {
+        // Check to see whether Traffic Cop is enabled for this resource...
+        if ($template::trafficCop($request) === false) {
+            return false;
+        }
+
         $date = $template->getDate('updated_at');
         return $request->input('_retrieved_at') && $date && $date->gt(
             Carbon::createFromTimestamp($request->input('_retrieved_at'))

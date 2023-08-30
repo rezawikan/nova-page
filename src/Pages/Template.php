@@ -12,10 +12,19 @@ use Whitecube\NovaPage\Exceptions\ValueNotFoundException;
 use Whitecube\NovaPage\Exceptions\TemplateContentNotFoundException;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Laravel\Nova\Http\Requests\NovaRequest;
+
 abstract class Template implements ArrayAccess
 {
     use HasAttributes;
     use Concerns\HasJsonAttributes;
+
+
+    /**
+     * Indicates whether Nova should check for modifications between viewing and updating a resource.
+     *
+     * @var bool
+     */
+    public static $trafficCop = true;
 
     /**
      * The page name (usually the route's name)
@@ -95,9 +104,9 @@ abstract class Template implements ArrayAccess
      *
      * @return string
      */
-    public function getSource() : SourceInterface
+    public function getSource(): SourceInterface
     {
-        if(is_string($this->source) || is_null($this->source)) {
+        if (is_string($this->source) || is_null($this->source)) {
             $source = $this->source ?? config('novapage.default_source');
             $this->source = new $source;
             $this->source->setConfig(config('novapage.sources.' . $this->source->getName()) ?? []);
@@ -124,16 +133,16 @@ abstract class Template implements ArrayAccess
      */
     public function load($throwOnMissing = false)
     {
-        if(!$this->name || count($this->attributes)) {
+        if (!$this->name || count($this->attributes)) {
             return $this;
         }
 
-        if($data = $this->getSource()->fetch($this)) {
+        if ($data = $this->getSource()->fetch($this)) {
             $this->fill($data);
             return $this;
         }
 
-        if($throwOnMissing) {
+        if ($throwOnMissing) {
             throw new TemplateContentNotFoundException($this->getSource()->getName(), $this->type, $this->name);
         }
         return $this;
@@ -151,15 +160,21 @@ abstract class Template implements ArrayAccess
         $this->title = $data['title'] ?? null;
         $this->attributes = $data['attributes'] ?? [];
 
-        $this->setDateIf('created_at', $data['created_at'] ?? null,
-            function(Carbon $new, Carbon $current = null) {
+        $this->setDateIf(
+            'created_at',
+            $data['created_at'] ?? null,
+            function (Carbon $new, Carbon $current = null) {
                 return (!$current || $new->lessThan($current));
-            });
+            }
+        );
 
-        $this->setDateIf('updated_at', $data['updated_at'] ?? null,
-            function(Carbon $new, Carbon $current = null) {
+        $this->setDateIf(
+            'updated_at',
+            $data['updated_at'] ?? null,
+            function (Carbon $new, Carbon $current = null) {
                 return (!$current || $new->greaterThan($current));
-            });
+            }
+        );
     }
 
     /**
@@ -202,12 +217,14 @@ abstract class Template implements ArrayAccess
     public function __call($method, $arguments)
     {
         $getter = 'get' . ucfirst($method);
-        if(method_exists($this, $getter)) {
+        if (method_exists($this, $getter)) {
             return call_user_func_array([$this, $getter], $arguments);
         }
 
         throw new BadMethodCallException(sprintf(
-            'Method %s::%s does not exist.', static::class, $method
+            'Method %s::%s does not exist.',
+            static::class,
+            $method
         ));
     }
 
@@ -275,7 +292,7 @@ abstract class Template implements ArrayAccess
      */
     public function get($attribute, Closure $closure = null)
     {
-        if($closure) {
+        if ($closure) {
             return $closure($this->__get($attribute));
         }
 
@@ -290,17 +307,17 @@ abstract class Template implements ArrayAccess
      */
     public function __get($attribute)
     {
-        if(!$attribute) return;
+        if (!$attribute) return;
 
-        if($attribute === 'nova_page_title') {
+        if ($attribute === 'nova_page_title') {
             return $this->getTitle();
         }
 
-        if($attribute === 'nova_page_created_at') {
+        if ($attribute === 'nova_page_created_at') {
             return $this->getDate('created_at');
         }
 
-        if(!isset($this->attributes[$attribute]) && $this->throwOnMissing) {
+        if (!isset($this->attributes[$attribute]) && $this->throwOnMissing) {
             $path = $this->getSource()->getErrorLocation($this->type, $this->name);
             throw new ValueNotFoundException($attribute, get_class($this), $path);
         }
@@ -323,12 +340,14 @@ abstract class Template implements ArrayAccess
         // If the attribute exists in the attribute array or has a "get" mutator we will
         // get the attribute's value. Otherwise, we will proceed as if the developers
         // are asking for a relationship's value. This covers both types of values.
-        if (array_key_exists($key, $this->attributes) ||
-            $this->hasGetMutator($key)) {
+        if (
+            array_key_exists($key, $this->attributes) ||
+            $this->hasGetMutator($key)
+        ) {
             return $this->getAttributeValue($key);
         }
 
-        if($this->throwOnMissing) {
+        if ($this->throwOnMissing) {
             $path = $this->getSource()->getFilePath($this->type, $this->name);
             throw new ValueNotFoundException($key, get_class($this), $path);
         }
@@ -354,9 +373,9 @@ abstract class Template implements ArrayAccess
      */
     public function setDate($moment, $date = null)
     {
-        if(!$date) return;
+        if (!$date) return;
 
-        if($date instanceof Carbon) {
+        if ($date instanceof Carbon) {
             return $this->dates[$moment] = $date;
         }
 
@@ -373,10 +392,10 @@ abstract class Template implements ArrayAccess
      */
     public function setDateIf($moment, $date, Closure $closure)
     {
-        if(!($date instanceof Carbon)) {
+        if (!($date instanceof Carbon)) {
             $date = new Carbon($date);
         }
-        if($closure($date, $this->getDate($moment))) {
+        if ($closure($date, $this->getDate($moment))) {
             return $this->setDate($moment, $date);
         }
     }
@@ -411,7 +430,7 @@ abstract class Template implements ArrayAccess
      */
     public function offsetExists(mixed $offset): bool
     {
-        return ! is_null($this->__get($offset));
+        return !is_null($this->__get($offset));
     }
 
     /**
@@ -481,8 +500,10 @@ abstract class Template implements ArrayAccess
      */
     public function save()
     {
-        $this->setDateIf('created_at', Carbon::now(),
-            function(Carbon $new, Carbon $current = null) {
+        $this->setDateIf(
+            'created_at',
+            Carbon::now(),
+            function (Carbon $new, Carbon $current = null) {
                 return !$current;
             }
         );
@@ -518,5 +539,4 @@ abstract class Template implements ArrayAccess
     {
         return $this->raw;
     }
-
 }
